@@ -19,13 +19,6 @@ import VideoCall from './components/video call/videocall';
 const App = () => {
   
 
-  // Fetch data from the backend
-  useEffect(() => {
-    fetch('http://localhost:3000')
-      .then((response) => response.json())
-      .then((data) => (data.message))
-      .catch((error) => console.error('Error fetching data:', error));
-  }, []);
 
   return (
     <div className='mx-4 sm:mx-[10%]'>

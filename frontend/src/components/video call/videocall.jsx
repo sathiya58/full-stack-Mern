@@ -81,6 +81,8 @@ const VideoCall = ({ meetingNumber, passcode, userName }) => {
             {chatMessages.map((msg, index) => (
               <div key={index}>
                 <strong>{msg.user}:</strong> {msg.message}
+               
+
               </div>
             ))}
           </div>
@@ -99,6 +101,8 @@ const VideoCall = ({ meetingNumber, passcode, userName }) => {
             >
               Send
             </button>
+            <VideoCall meetingNumber="12345" />
+
           </div>
         </div>
       )}
