@@ -1,53 +1,67 @@
-import { useContext, useEffect, useState } from 'react'; // Removed unused 'React' import
+import { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
-  const [state, setState] = useState('Sign Up');
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+const Auth = () => {
+  const [state, setState] = useState('Sign Up'); // Toggle between 'Sign Up' and 'Login'
+  const [name, setName] = useState('');          // For the sign up form name field
+  const [email, setEmail] = useState('');        // Email for both login and sign up
+  const [password, setPassword] = useState('');  // Password for both login and sign up
 
   const navigate = useNavigate();
-  const { backendUrl, token, setToken } = useContext(AppContext);
+  const { backendUrl, token, setToken } = useContext(AppContext);  // Extract token and setToken from context
 
+  // Handle form submission (either sign up or login)
   const onSubmitHandler = async (event) => {
     event.preventDefault();
 
+    // Check if the user is signing up
     if (state === 'Sign Up') {
-      const { data } = await axios.post(
-        "http://localhost:3000/api/user/register",
-        { name, email, password }
-      );
+      try {
+        const { data } = await axios.post(
+          'http://localhost:3000/api/user/register',
+          { name, email, password }
+        );
 
-      if (data.success) {
-        localStorage.setItem('token', data.token);
-        setToken(data.token);
-      } else {
-        toast.error(data.message);
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          setToken(data.token);  // Store token and update context
+          toast.success('Account created successfully!');
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error('An error occurred during registration');
       }
     } else {
-      const { data } = await axios.post(
-        backendUrl + '/api/user/login',
-        { email, password }
-      );
+      // Handle user login
+      try {
+        const { data } = await axios.post(
+          backendUrl + '/api/user/login',
+          { email, password }
+        );
 
-      if (data.success) {
-        localStorage.setItem('token', data.token);
-        setToken(data.token);
-      } else {
-        toast.error(data.message);
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          setToken(data.token);  // Store token and update context
+          toast.success('Logged in successfully!');
+        } else {
+          toast.error(data.message);
+        }
+      } catch (error) {
+        toast.error('An error occurred during login');
       }
     }
   };
 
+  // Redirect the user if they are already logged in
   useEffect(() => {
     if (token) {
-      navigate('/');
+      navigate('/');  // Redirect to home/dashboard if token exists
     }
-  }, [token, navigate]); // Added 'navigate' as a dependency
+  }, [token, navigate]);
 
   return (
     <form onSubmit={onSubmitHandler} className='min-h-[80vh] flex items-center'>
@@ -56,9 +70,10 @@ const Login = () => {
           {state === 'Sign Up' ? 'Create Account' : 'Login'}
         </p>
         <p>
-          Please {state === 'Sign Up' ? 'sign up' : 'log in'} to book
-          appointment
+          Please {state === 'Sign Up' ? 'sign up' : 'log in'} to book appointments
         </p>
+
+        {/* Full Name input field only visible for Sign Up */}
         {state === 'Sign Up' && (
           <div className='w-full'>
             <p>Full Name</p>
@@ -66,34 +81,41 @@ const Login = () => {
               onChange={(e) => setName(e.target.value)}
               value={name}
               className='border border-[#DADADA] rounded w-full p-2 mt-1'
-              type="text"
+              type='text'
               required
             />
           </div>
         )}
+
+        {/* Email input field */}
         <div className='w-full'>
           <p>Email</p>
           <input
             onChange={(e) => setEmail(e.target.value)}
             value={email}
             className='border border-[#DADADA] rounded w-full p-2 mt-1'
-            type="email"
+            type='email'
             required
           />
         </div>
+
+        {/* Password input field */}
         <div className='w-full'>
           <p>Password</p>
           <input
             onChange={(e) => setPassword(e.target.value)}
             value={password}
             className='border border-[#DADADA] rounded w-full p-2 mt-1'
-            type="password"
+            type='password'
             required
           />
         </div>
+
         <button className='bg-primary text-white w-full py-2 my-2 rounded-md text-base'>
-          {state === 'Sign Up' ? 'Create account' : 'Login'}
+          {state === 'Sign Up' ? 'Create Account' : 'Login'}
         </button>
+
+        {/* Toggle between Sign Up and Login forms */}
         {state === 'Sign Up' ? (
           <p>
             Already have an account?{' '}
@@ -120,4 +142,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Auth;

@@ -14,13 +14,14 @@ import Footer from './components/Footer';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Verify from './pages/Verify';
+import VideoCall from './components/video call/videocall';
 
 const App = () => {
   
 
   // Fetch data from the backend
   useEffect(() => {
-    fetch('http://localhost:3000/api/data')
+    fetch('http://localhost:3000')
       .then((response) => response.json())
       .then((data) => (data.message))
       .catch((error) => console.error('Error fetching data:', error));
@@ -37,6 +38,7 @@ const App = () => {
         <Route path='/login' element={<Login />} />
         <Route path='/about' element={<About />} />
         <Route path='/contact' element={<Contact />} />
+        <Route path='/call&chat' element={<VideoCall />} />
         <Route path='/appointment/:docId' element={<Appointment />} />
         <Route path='/my-appointments' element={<MyAppointments />} />
         <Route path='/my-profile' element={<MyProfile />} />

@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'
+import  { useContext, useEffect, useState } from 'react'
 import { DoctorContext } from '../../context/DoctorContext'
 import { AppContext } from '../../context/AppContext'
 import { toast } from 'react-toastify'
@@ -21,7 +21,7 @@ const DoctorProfile = () => {
                 available: profileData.available
             }
 
-            const { data } = await axios.post(backendUrl + '/api/doctor/update-profile', updateData, { headers: { dToken } })
+            const { data } = await axios.post(  backendUrl + '/api/doctor/update-profile', updateData, { headers: { dToken } })
 
             if (data.success) {
                 toast.success(data.message)
@@ -40,11 +40,15 @@ const DoctorProfile = () => {
 
     }
 
+
+
+
     useEffect(() => {
         if (dToken) {
             getProfileData()
         }
-    }, [dToken])
+    }, [dToken, getProfileData])
+    
 
     return profileData && (
         <div>
