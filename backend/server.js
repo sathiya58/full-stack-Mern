@@ -8,7 +8,8 @@ import doctorRouter from "./routes/doctorRoute.js"
 import adminRouter from "./routes/adminRoute.js"
 
 // app config
-const app = express()
+// const app = express()
+const express = require('express')
 const port = process.env.PORT || 5000
 connectDB()
 connectCloudinary()
