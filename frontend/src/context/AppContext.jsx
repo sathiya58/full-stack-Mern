@@ -1,81 +1,82 @@
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useState, useCallback } from "react";
+import PropTypes from "prop-types";
 import { toast } from "react-toastify";
-import axios from 'axios'
+import axios from "axios";
 
-export const AppContext = createContext()
+export const AppContext = createContext();
 
-const AppContextProvider = (props) => {
+const AppContextProvider = ({ children }) => {
+    const currencySymbol = "₹";
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || "https://full-stack-mern-856n.onrender.com";
 
-    const currencySymbol = '₹'
-    const backendUrl = import.meta.env.VITE_BACKEND_URL
+    const [doctors, setDoctors] = useState([]);
+    const [token, setToken] = useState(localStorage.getItem("token") || "");
+    const [userData, setUserData] = useState(null);
 
-    const [doctors, setDoctors] = useState([])
-    const [token, setToken] = useState(localStorage.getItem('token') ? localStorage.getItem('token') : '')
-    const [userData, setUserData] = useState(false)
-
-    // Getting Doctors using API
-    const getDoctosData = async () => {
-
+    // Getting Doctors using API (wrapped in useCallback)
+    const getDoctorsData = useCallback(async () => {
         try {
-
-            const { data } = await axios.get(backendUrl + '/api/doctor/list')
+            const { data } = await axios.get(`${backendUrl}/api/doctor/list`);
             if (data.success) {
-                setDoctors(data.doctors)
+                setDoctors(data.doctors);
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            console.log(error)
-            toast.error(error.message)
+            console.error(error);
+            toast.error("Error fetching doctors data.");
         }
+    }, [backendUrl]); // Dependency added
 
-    }
-
-    // Getting User Profile using API
-    const loadUserProfileData = async () => {
-
+    // Getting User Profile using API (wrapped in useCallback)
+    const loadUserProfileData = useCallback(async () => {
+        if (!token) return;
         try {
-
-            const { data } = await axios.get(backendUrl + '/api/user/get-profile', { headers: { token } })
+            const { data } = await axios.get(`${backendUrl}/api/user/get-profile`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
             if (data.success) {
-                setUserData(data.userData)
+                setUserData(data.userData);
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            console.log(error)
-            toast.error(error.message)
+            console.error(error);
+            toast.error("Error fetching user profile.");
         }
-
-    }
+    }, [backendUrl, token]); // Dependencies added
 
     useEffect(() => {
-        getDoctosData()
-    }, [])
+        getDoctorsData();
+    }, [getDoctorsData]); // Now includes dependency
 
     useEffect(() => {
-        if (token) {
-            loadUserProfileData()
-        }
-    }, [token])
-
-    const value = {
-        doctors, getDoctosData,
-        currencySymbol,
-        backendUrl,
-        token, setToken,
-        userData, setUserData, loadUserProfileData
-    }
+        loadUserProfileData();
+    }, [loadUserProfileData]); // Now includes dependency
 
     return (
-        <AppContext.Provider value={value}>
-            {props.children}
+        <AppContext.Provider
+            value={{
+                doctors,
+                getDoctorsData,
+                currencySymbol,
+                backendUrl,
+                token,
+                setToken,
+                userData,
+                setUserData,
+                loadUserProfileData,
+            }}
+        >
+            {children}
         </AppContext.Provider>
-    )
+    );
+};
 
-}
+// ✅ Add PropTypes validation
+AppContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+};
 
-export default AppContextProvider
+export default AppContextProvider;

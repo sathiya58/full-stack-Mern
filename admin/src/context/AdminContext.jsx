@@ -1,118 +1,114 @@
 import axios from "axios";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+import PropTypes from "prop-types";
 import { toast } from "react-toastify";
 
+export const AdminContext = createContext();
 
-export const AdminContext = createContext()
+const AdminContextProvider = ({ children }) => {
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
-const AdminContextProvider = (props) => {
+    const [aToken, setAToken] = useState(localStorage.getItem("aToken") || "");
+    const [appointments, setAppointments] = useState([]);
+    const [doctors, setDoctors] = useState([]);
+    const [dashData, setDashData] = useState(false);
 
-    const backendUrl = import.meta.env.VITE_BACKEND_URL
-
-    const [aToken, setAToken] = useState(localStorage.getItem('aToken') ? localStorage.getItem('aToken') : '')
-
-    const [appointments, setAppointments] = useState([])
-    const [doctors, setDoctors] = useState([])
-    const [dashData, setDashData] = useState(false)
-
-    // Getting all Doctors data from Database using API
+    // Fetch all doctors from the database
     const getAllDoctors = async () => {
-
         try {
-
-            const { data } = await axios.get(backendUrl + '/api/admin/all-doctors', { headers: { aToken } })
+            const { data } = await axios.get(`${backendUrl}/api/admin/all-doctors`, {
+                headers: { aToken },
+            });
             if (data.success) {
-                setDoctors(data.doctors)
+                setDoctors(data.doctors);
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            toast.error(error.message)
+            toast.error(error.message);
         }
+    };
 
-    }
-
-    // Function to change doctor availablity using API
+    // Change doctor's availability
     const changeAvailability = async (docId) => {
         try {
-
-            const { data } = await axios.post(backendUrl + '/api/admin/change-availability', { docId }, { headers: { aToken } })
+            const { data } = await axios.post(
+                `${backendUrl}/api/admin/change-availability`,
+                { docId },
+                { headers: { aToken } }
+            );
             if (data.success) {
-                toast.success(data.message)
-                getAllDoctors()
+                toast.success(data.message);
+                getAllDoctors();
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            console.log(error)
-            toast.error(error.message)
+            toast.error(error.message);
         }
-    }
+    };
 
-
-    // Getting all appointment data from Database using API
+    // Fetch all appointments
     const getAllAppointments = async () => {
-
         try {
-
-            const { data } = await axios.get(backendUrl + '/api/admin/appointments', { headers: { aToken } })
+            const { data } = await axios.get(`${backendUrl}/api/admin/appointments`, {
+                headers: { aToken },
+            });
             if (data.success) {
-                setAppointments(data.appointments.reverse())
+                setAppointments(data.appointments.reverse());
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            toast.error(error.message)
-            console.log(error)
+            toast.error(error.message);
         }
+    };
 
-    }
-
-    // Function to cancel appointment using API
+    // Cancel appointment
     const cancelAppointment = async (appointmentId) => {
-
         try {
-
-            const { data } = await axios.post(backendUrl + '/api/admin/cancel-appointment', { appointmentId }, { headers: { aToken } })
-
+            const { data } = await axios.post(
+                `${backendUrl}/api/admin/cancel-appointment`,
+                { appointmentId },
+                { headers: { aToken } }
+            );
             if (data.success) {
-                toast.success(data.message)
-                getAllAppointments()
+                toast.success(data.message);
+                getAllAppointments();
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            toast.error(error.message)
-            console.log(error)
+            toast.error(error.message);
         }
+    };
 
-    }
-
-    // Getting Admin Dashboard data from Database using API
+    // Fetch admin dashboard data
     const getDashData = async () => {
         try {
-
-            const { data } = await axios.get(backendUrl + '/api/admin/dashboard', { headers: { aToken } })
-
+            const { data } = await axios.get(`${backendUrl}/api/admin/dashboard`, {
+                headers: { aToken },
+            });
             if (data.success) {
-                setDashData(data.dashData)
+                setDashData(data.dashData);
             } else {
-                toast.error(data.message)
+                toast.error(data.message);
             }
-
         } catch (error) {
-            console.log(error)
-            toast.error(error.message)
+            toast.error(error.message);
         }
+    };
 
-    }
+    // useEffect to fetch necessary data when the component mounts
+    useEffect(() => {
+        getAllDoctors();
+        getAllAppointments();
+        getDashData();
+    }, [aToken]); // Added missing dependencies
 
     const value = {
-        aToken, setAToken,
+        aToken,
+        setAToken,
         doctors,
         getAllDoctors,
         changeAvailability,
@@ -120,15 +116,15 @@ const AdminContextProvider = (props) => {
         getAllAppointments,
         getDashData,
         cancelAppointment,
-        dashData
-    }
+        dashData,
+    };
 
-    return (
-        <AdminContext.Provider value={value}>
-            {props.children}
-        </AdminContext.Provider>
-    )
+    return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;
+};
 
-}
+// ✅ Added PropTypes validation for children
+AdminContextProvider.propTypes = {
+    children: PropTypes.node.isRequired,
+};
 
-export default AdminContextProvider
+export default AdminContextProvider;
