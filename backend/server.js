@@ -10,13 +10,18 @@ import adminRouter from "./routes/adminRoute.js"
 // app config
  const app = express()
 
+
+
+
 const port = process.env.PORT || 5000
 connectDB()
 connectCloudinary()
 
 // middlewares
 app.use(express.json())
-app.use(cors())
+app.use(cors)
+  
+   
 
 
 

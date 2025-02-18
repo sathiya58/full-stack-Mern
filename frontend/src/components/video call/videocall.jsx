@@ -1,11 +1,10 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import ZoomIntegration from './ZoomIntegration'; // Ensure the path is correct for your ZoomIntegration component
+import ZoomIntegration from './ZoomIntegration'; // Ensure the path is correct
 
 const VideoCall = ({ meetingNumber, passcode, userName }) => {
   const [isCallActive, setCallActive] = useState(false);
-  const [intervalId, setIntervalId] = useState(null);
   const [chatMessages, setChatMessages] = useState([]); // State to hold chat messages
   const [currentMessage, setCurrentMessage] = useState(''); // State for current message input
 
@@ -17,9 +16,6 @@ const VideoCall = ({ meetingNumber, passcode, userName }) => {
   // Handle ending the call
   const handleEndCall = () => {
     setCallActive(false);
-    if (intervalId) {
-      clearInterval(intervalId); // Cleanup interval if the call ends
-    }
   };
 
   // Add a new message to chat
@@ -30,29 +26,10 @@ const VideoCall = ({ meetingNumber, passcode, userName }) => {
     }
   };
 
-  // Setting up intervals if necessary and clean up when call ends
-  useEffect(() => {
-    if (isCallActive) {
-      const id = setInterval(() => {
-        console.log('Interval running while call is active');
-      }, 1000); // Adjust interval timing as required
-      setIntervalId(id);
-    } else {
-      if (intervalId) {
-        clearInterval(intervalId); // Clean up interval when call ends
-      }
-    }
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId); // Cleanup if component unmounts
-      }
-    };
-  }, [isCallActive, intervalId]); // Ensure intervalId and isCallActive are in the dependency array
-
   return (
     <div className="video-call-container">
       <h2>Video Call for {userName}</h2>
+      
       {!isCallActive ? (
         <button
           onClick={handleStartCall}
@@ -81,8 +58,6 @@ const VideoCall = ({ meetingNumber, passcode, userName }) => {
             {chatMessages.map((msg, index) => (
               <div key={index}>
                 <strong>{msg.user}:</strong> {msg.message}
-               
-
               </div>
             ))}
           </div>
@@ -101,8 +76,6 @@ const VideoCall = ({ meetingNumber, passcode, userName }) => {
             >
               Send
             </button>
-            <VideoCall meetingNumber="12345" />
-
           </div>
         </div>
       )}
@@ -111,7 +84,7 @@ const VideoCall = ({ meetingNumber, passcode, userName }) => {
 };
 
 VideoCall.propTypes = {
-  meetingNumber: PropTypes.string.isRequired,
+  meetingNumber: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   passcode: PropTypes.string.isRequired,
   userName: PropTypes.string.isRequired,
 };
